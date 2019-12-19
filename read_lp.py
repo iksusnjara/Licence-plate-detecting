@@ -33,9 +33,9 @@ def read_lp(lps):
         
         
 
-    
-    #making thresholded plates for tesseract
+    #preporcessing plates images for tesseract
     regs = []
+    #adding thresholded images, with Otsu
     for i in lps:
         regs.append(cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1])
     # adding median filtering (denoiser) for each image
@@ -68,12 +68,13 @@ def read_lp(lps):
         for j in all_regs_clean[i]:
             if j not in char:
                 all_regs_clean[i] = all_regs_clean[i].replace(j,'')
+    #remowing all reads shorter than 3
     for i in all_regs_clean:
         if len(i) < 3:
             all_regs_clean.remove(i)
             
             
-        #city as first 2 letters read
+     #city as first 2 letters read
     for i in all_regs_clean:
         city.append(i[0:2])
     #replacing numbers with letters
@@ -102,12 +103,11 @@ def read_lp(lps):
     for i in city:
         if i in cro_cities:
             city2.append(i)
-    #reading 2nd and 3rd characters if 1st and 2nd fail
+    #reading city as 2nd and 3rd characters if first 2 did not return anything
     if city2 == []:
-        #third variable - tells if 1and2 or 2and3 are used as city letters
-        third = True
         for i in all_regs_clean:
             city.append(i[1:3])
+          #more cleaning
         for i in range(len(city)):
             for j in city[i]:
                 if j == '1':
@@ -128,13 +128,12 @@ def read_lp(lps):
                     city[i] = city[i].replace(j,'B')
                 if j == '0':
                     city[i] = city[i].replace(j,'O')
+         #keeping only reads which exist in croatia
         city2 = []
         for i in city:
             if i in cro_cities:
                 city2.append(i)
-    #third set to false if first two letters are used
-    else:
-        third = False
+                
     #cleaning D and O
     for i in range(len(city2)):
         if city2[i] == 'OA':
@@ -151,18 +150,19 @@ def read_lp(lps):
             city2[i] = 'OG'
         if city2[i] == 'ZO':
             city2[i] = 'ZD'
-    city2
+    #final list of possible cities
     city = list(set(city2))
 
     
     
     
-        #ending 2 letters segment
-    #try to keep only ones with length 1 and 2
+       #ending 2 letters segment
+    #keeping only ones with length of 2
     end = []
     #appending last 2 chars
     for i in all_regs_clean:
         end.append(i[-2:])
+        #cleaning numbers and letters
     for i in range(len(end)):
         for j in end[i]:
             if j == '1':
@@ -189,12 +189,14 @@ def read_lp(lps):
     for i in end:
         if len(i) != 2:
             end.remove(i)
-    # D and D
+    # D and O
     for i in range(len(end)):
         if 'O' in end[i]:
             end.append(end[i].replace('O', 'D'))
         if 'D' in end[i]:
             end.append(end[i].replace('D', 'O'))
+            
+      #final list of all possibilities for last segment
 
     end = list(set(end))
     
@@ -203,6 +205,7 @@ def read_lp(lps):
     numbers_last = []
 
     # -2:-1 char
+    #cleaning letters and numbers
     for i in range(len(all_regs_clean)):
         a = list(all_regs_clean[i])
         for j in range(1,3):
@@ -240,8 +243,11 @@ def read_lp(lps):
     numbers_last = list(set(numbers_last))
     
     #list for cleaning numbers
+    #here we remove first letters from original reads
+    # last are already removed
     numbers = []
-    #1 char
+    #first char
+    #appending it to numbes list
     for i in range(len(numbers_last)):
         a = list(numbers_last[i])
         if a[0] == '1':
@@ -265,8 +271,11 @@ def read_lp(lps):
         b = ''.join(a)
         numbers.append(b)
 
-    # 0:2 char
-    for i in range(len(numbers_last)):
+    # changing second char after the first has already been changed
+    # appending to numbers list
+    # so both versions - with only first changed as well as with both first and second changed
+    # are kept
+    for i in range(len(numbers)):
         a = list(numbers[i])
         if a[1] == '1':
             a[1] = 'I'
@@ -290,6 +299,10 @@ def read_lp(lps):
         numbers.append(b)
 
     #0:3 char
+    # same as above
+    # at the end keeps versions where only first is changed
+     # first and second are changed
+      # all 3 are changed
     for i in range(len(numbers)):
         a = list(numbers[i])
         if a[2] == '1':
@@ -314,7 +327,10 @@ def read_lp(lps):
         numbers.append(b)
     numbers = list(set(numbers))
 
-    ## throwing letters out after removing first char
+    ## throwing letters out after changing first 3 chars
+     # keeps only numbers
+     # if they were originally letters, they are removed
+      # if they were originally numbers which are misread, they are converted to letters and removed
     numbers2 = numbers.copy()
     for i in range(len(numbers2)):
         for j in numbers2[i]:
@@ -345,4 +361,5 @@ def read_lp(lps):
     final2 = list(final2)
     final2
     
+    # final list of all posible licence plates
     return(final2)

@@ -10,9 +10,11 @@ def lp_finder_3(car):
     car - image of a car'''
     
 
-    #thresholding car image
+    #changing car image to RGB
     car = cv2.cvtColor(car, cv2.COLOR_BGR2GRAY)
+    #resizing to 600x400
     car_r = cv2.resize(car, (600,400))
+    #thresholding using Otsu binarization
     car_th = cv2.threshold(car_r, 0,255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
     #getting canny
     car_canny = cv2.Canny(car_th, 200,400)
