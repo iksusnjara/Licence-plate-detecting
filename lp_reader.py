@@ -344,14 +344,11 @@ class lp_reader():
                 if j not in numchar:
                     numbers[i] = numbers[i].replace(j,'')
 
-        #if item is 5 long and contains 2 - probable read from croatian coat of arms
-        #removing this 2 and keeping rest
+        #if item is 5 long, probably contains some misread caused by croatian coat of arms
+        #removing this and keeping rest
         for i in range(len(numbers)):
             if len(numbers[i]) == 5:
-                if numbers[i][0] == '2':
-                    numbers[i] = list(numbers[i])
-                    numbers[i] = numbers[i][1:]
-                    numbers[i] = ''.join(numbers[i])
+                numbers[i] = numbers[i][1:]
         #throwing out all not long 3 or 4
         numbers2 = []
         for i in numbers:
@@ -382,5 +379,7 @@ class lp_reader():
                 final.append(city + '-' + j + '-' + i)
 
         return(final)
+    
+
 
     
