@@ -107,15 +107,13 @@ class lp_reader():
             numchar.append(str(i))
 
 
-
-
         #making thresholded plates for tesseract
         regs = []
-        for i in lp_reader.cropped:
-            regs.append(cv2.threshold(i, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1])
         # adding median filtering (denoiser) for each image
+        # each image is first thresholded
         for i in range(len(lp_reader.cropped)):
-            regs.append(cv2.morphologyEx(cv2.medianBlur(lp_reader.cropped[i], 5), op=cv2.MORPH_OPEN, kernel=(7,7)))
+            x = cv2.threshold(lp_reader.cropped[i],0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+            regs.append(cv2.morphologyEx(cv2.medianBlur(x, 5), op=cv2.MORPH_OPEN, kernel=(7,7)))
         # adding original images
         for i in lp_reader.cropped:
             regs.append(i)
@@ -249,12 +247,11 @@ class lp_reader():
         for i in all_regs_clean:
             if len(i) >= 7:
                 last.append(i)
-
+                
         #taking last 2 letters
         for i in range(len(last)):
             last[i] = last[i][-2:]
-
-
+            
             #cleaning numbers and letters
         for i in range(len(last)):
             for j in last[i]:
